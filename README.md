@@ -16,14 +16,14 @@ Another query was designed to look for the most-active weather station, i.e. the
 
 ![temperature](Images/temperature_hist.png)
 
-## Climate App##
+## Climate App
 
 Next, a Flask App with five routes is made to present ```jsonify``` results of the queries. User can also type in self-selected dates to run the queries.
 
-## Additional Statistical Analyses##
+## Additional Statistical Analyses
 
 **Correlation Analysis**<br/>
-Average temperatures in June and December across all stations are calculated. As these two samples are considered independent, an indepedent t-test is performed to determine if the difference in the mean temperatures is statistically significant. Results suggest that such difference is indeed statistically significant.
+Average temperatures in June and December across all stations are calculated. As these two samples are considered independent, an indepedent t-test is performed to determine if the difference in the mean temperatures is statistically significant. Results suggest that such difference is indeed statistically significant because the pvalue is smaller that 0.05.
 
 **Y Error Analysis**<br/>
 To research the temperature of Hawaii for a hypothetical trip with hypothetical dates, the minimum, average and maximum temperatures using the matching dates from the previous years are calculated. The average temperature and the y error bar (maximum temperature minus minimum temperature) are plotted to graphically show the variability of data and give an indication of the level of uncertainty.
