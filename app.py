@@ -38,7 +38,7 @@ app = Flask(__name__)
 def home():
     """List all available api routes."""
     return (
-        f'<h3><font face="arial">Below are the available routes to access precipitation and temperature data of Hawaii during 2017-01-01 adn 2018-08-23:</font></h3><br/><br/>'
+        f'<h3><font face="arial">Below are the available routes to access precipitation and temperature data of Hawaii during 2017-01-01 and 2018-08-23:</font></h3><br/><br/>'
         f'<font face="arial">1. Precipitation data on all available dates:</font><br/>'
         f'<font color="#D35400" font face="arial">/api/v1.0/precipitation</font><br/><br/>'
         f'<font face="arial">2. The list of weather stations:</font><br/>'
