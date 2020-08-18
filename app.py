@@ -38,18 +38,18 @@ app = Flask(__name__)
 def home():
     """List all available api routes."""
     return (
-        f'<h2><font face="arial">Below are the available routes:</font></h2><br/><br/>'
-        f'<font face="arial">1. To query precipitation data on all available dates:</font><br/>'
+        f'<h3><font face="arial">Below are the available routes to access precipitation and temperature data of Hawaii during 2017-01-01 adn 2018-08-23:</font></h3><br/><br/>'
+        f'<font face="arial">1. Precipitation data on all available dates:</font><br/>'
         f'<font color="#D35400" font face="arial">/api/v1.0/precipitation</font><br/><br/>'
-        f'<font face="arial">2. To query the list of weather stations:</font><br/>'
+        f'<font face="arial">2. The list of weather stations:</font><br/>'
         f'<font color="#D35400" font face="arial">/api/v1.0/stations</font><br/><br/>'
-        f'<font face="arial">3. To query temperature values recorded by the most active station across all dates:</font><br/>'
+        f'<font face="arial">3. Temperature values recorded by the most active station across all dates:</font><br/>'
         f'<font color="#D35400" font face="arial">/api/v1.0/tobs</font><br/><br/>'
-        f'<font face="arial">4. To query temperature statistics on a selected date between 2010-01-01 and 2017-08-23:</font><br/>'
+        f'<font face="arial">4. Temperature statistics during a date range with a self-selected start date:</font><br/>'
         f'<font color="#D35400" font face="arial">/api/v1.0/&lt;start&gt;</font><br/><br/>'
-        f'<font face="arial">5. To query temperature statistics during a date range, i.e. any start and end dates found between 2010-01-01 and 2017-08-23:</font><br/>'
+        f'<font face="arial">5. Temperature statistics during a date range with self-selected start and end dates:</font><br/>'
         f'<font color="#D35400" font face="arial">/api/v1.0/&lt;start&gt;/&lt;end&gt;</font><br/><br/>'
-        f'<font face="arial"><i>Note: All dates should be typed in the format of yyyy-mm-dd</i></font>'
+        f'<font face="arial"><i>Note: Any dates selected to run route 4 and 5 should be typed in the format of yyyy-mm-dd.</i></font><br/>'      
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -69,7 +69,7 @@ def precipitation():
         p_dict['date'] = date
         p_dict['precipitation'] = prcp
         all_precipitation.append(p_dict)
-        return jsonify(all_precipitation)
+    return jsonify(all_precipitation)
 
 @app.route("/api/v1.0/stations")
 def station():
@@ -94,10 +94,11 @@ def tobs():
     most_active = session.query(Measurement.station).\
                                 group_by(Measurement.station).\
                                 order_by(func.count(Measurement.date).desc()).first()
-    most_active = most_active[0]
+    most_active_stn = most_active[0]
+    
     # Query dates and temperatures of the most active station for the last year of data
     results = session.query(Measurement.date, Measurement.tobs).\
-                            filter(Measurement.station == most_active).\
+                            filter(Measurement.station == most_active_stn).\
                             filter(Measurement.date >= year_ago).all()
     session.close()
 
@@ -114,26 +115,20 @@ def tobs():
 def start(start):
     session = Session(engine)
 
-    # Convert any date to YYYY-MM-DD format for query
-    start_date = dt.datetime.strptime(start, '%Y-%m-%d')
-
     # Query data for the start date
-    results = session.query(Measurement.date,\
-                            func.min(Measurement.tobs),\
+    results = session.query(func.min(Measurement.tobs),\
                             func.avg(Measurement.tobs),\
                             func.max(Measurement.tobs)).\
-                            filter(Measurement.date >= start_date).\
-                            group_by(Measurement.date).all()
+                            filter(Measurement.date >= start).all()
     session.close()
 
     # Create a dictionary from the data and append to a list of temp_start
     temp_start = []
     for result in results:
         temp_start_dict = {}
-        temp_start_dict['date'] = result[0]
-        temp_start_dict['min temp'] = result[1]
-        temp_start_dict['avg temp'] = result[2]
-        temp_start_dict['max temp'] = result[3]
+        temp_start_dict['min temp'] = result[0]
+        temp_start_dict['avg temp'] = result[1]
+        temp_start_dict['max temp'] = result[2]
         temp_start.append(temp_start_dict)
         return jsonify(temp_start)
 
@@ -141,28 +136,21 @@ def start(start):
 def range(start, end):
     session = Session(engine)
 
-    # Convert any dates to YYYY-MM-DD format for query
-    start_date = dt.datetime.strptime(start, '%Y-%m-%d')
-    end_date = dt.datetime.strptime(end, '%Y-%m-%d')
-
     # Query data between the start and end dates
-    results = session.query(Measurement.date,\
-                            func.min(Measurement.tobs),\
+    results = session.query(func.min(Measurement.tobs),\
                             func.avg(Measurement.tobs),\
                             func.max(Measurement.tobs)).\
-                            filter(Measurement.date >= start_date).\
-                            filter(Measurement.date <= end_date).\
-                            group_by(Measurement.date).all()
+                            filter(Measurement.date >= start).\
+                            filter(Measurement.date <= end).all()
     session.close()
 
     # Create a dictionary from the data and append to a list of start_end
     start_end = []
     for result in results:
         se_dict = {}
-        se_dict['date'] = result[0]
-        se_dict['min temp'] = result[1]
-        se_dict['avg temp'] = result[2]
-        se_dict['max temp'] = result[3]
+        se_dict['min temp'] = result[0]
+        se_dict['avg temp'] = result[1]
+        se_dict['max temp'] = result[2]
         start_end.append(se_dict)
         return jsonify(start_end)
 
